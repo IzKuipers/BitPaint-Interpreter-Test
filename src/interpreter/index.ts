@@ -116,8 +116,9 @@ export class Interpreter {
   }
 
   async Execute() {
-    console.log(`Beginning execution`);
     const start = Date.now();
+    console.log(`Beginning execution`);
+
     this.InstructionPointer = 0;
     this.MemoryPointer = 0;
     this.fillMemory();
@@ -132,6 +133,7 @@ export class Interpreter {
     }
 
     this.renderer.render();
+
     const end = Date.now() - start;
     console.log(`Stopped execution: ${end}ms`);
   }
