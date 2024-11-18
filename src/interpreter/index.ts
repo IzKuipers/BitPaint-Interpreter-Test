@@ -66,7 +66,7 @@ export class Interpreter {
     );
   }
 
-  step() {
+  async step() {
     const instruction = this.Instructions[this.InstructionPointer];
 
     switch (instruction) {
@@ -81,6 +81,12 @@ export class Interpreter {
         break;
       case "-":
         this.decrementByte();
+        break;
+      case ".":
+        this.renderer.render();
+        if (!this.InstantMode) {
+          await sleep(0);
+        }
         break;
       case " ":
       case "\n":
@@ -128,15 +134,8 @@ export class Interpreter {
     this.fillMemory();
 
     while (this.InstructionPointer < this.Instructions.length) {
-      this.step();
-
-      if (!this.InstantMode) {
-        this.renderer.render();
-        await sleep(0);
-      }
+      await this.step();
     }
-
-    this.renderer.render();
 
     const end = Date.now() - start;
     console.log(`Stopped execution: ${end}ms`);
