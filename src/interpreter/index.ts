@@ -18,6 +18,7 @@ export class Interpreter {
   MaxByteHeight: number = 1;
   InstantMode: boolean = true;
   renderer: Renderer;
+  bracketMap: Map<number, number> = new Map();
 
   constructor(
     input: string,
@@ -28,6 +29,7 @@ export class Interpreter {
 
     this.parseHeader();
     this.fillMemory();
+    this.preprocessBrackets();
 
     this.renderer = new renderer(this, ...rendererArgs);
   }
@@ -61,9 +63,28 @@ export class Interpreter {
   fillMemory() {
     const dimension = this.Size[0] ** 2;
 
-    this.Memory = new Array<number>(dimension).fill(
-      this.FillBlack ? 0 : this.Depth.length - 1
-    );
+    this.Memory = new Array<number>(dimension).fill(0);
+  }
+
+  preprocessBrackets() {
+    const stack: number[] = [];
+
+    this.Instructions.forEach((instruction, index) => {
+      if (instruction === "[") {
+        stack.push(index);
+      } else if (instruction === "]") {
+        if (stack.length === 0) {
+          throw new Error(`Unmatched ']' at position ${index}`);
+        }
+        const start = stack.pop()!;
+        this.bracketMap.set(start, index);
+        this.bracketMap.set(index, start);
+      }
+    });
+
+    if (stack.length > 0) {
+      throw new Error(`Unmatched '[' at position ${stack.pop()}`);
+    }
   }
 
   async step() {
@@ -71,7 +92,7 @@ export class Interpreter {
 
     switch (instruction) {
       case "<":
-        this.decrememtPointer();
+        this.decrementPointer();
         break;
       case ">":
         this.incrementPointer();
@@ -81,6 +102,12 @@ export class Interpreter {
         break;
       case "-":
         this.decrementByte();
+        break;
+      case "[":
+        this.jumpForwardIfZero();
+        break;
+      case "]":
+        this.jumpBackwardIfNotZero();
         break;
       case ".":
         this.renderer.render();
@@ -100,23 +127,45 @@ export class Interpreter {
     this.InstructionPointer++;
   }
 
-  decrememtPointer() {
+  jumpForwardIfZero() {
+    if (this.Memory[this.MemoryPointer] === 0) {
+      const target = this.bracketMap.get(this.InstructionPointer);
+      if (typeof target === "undefined") {
+        throw new Error(`Unmatched '[' at position ${this.InstructionPointer}`);
+      }
+      this.InstructionPointer = target;
+    }
+  }
+
+  jumpBackwardIfNotZero() {
+    if (this.Memory[this.MemoryPointer] !== 0) {
+      const target = this.bracketMap.get(this.InstructionPointer);
+      if (typeof target === "undefined") {
+        throw new Error(`Unmatched ']' at position ${this.InstructionPointer}`);
+      }
+      this.InstructionPointer = target;
+    }
+  }
+
+  decrementPointer() {
     this.MemoryPointer--;
     if (this.MemoryPointer < 0) throw new Error("Memory pointer out of bounds");
   }
 
   incrementPointer() {
     this.MemoryPointer++;
-    if (this.MemoryPointer > this.Memory.length)
+    if (this.MemoryPointer >= this.Memory.length)
       throw new Error(
-        `Memory pointer out of bounds ${this.MemoryPointer} > ${this.Memory.length}`
+        `Memory pointer out of bounds ${this.MemoryPointer} >= ${this.Memory.length}`
       );
   }
 
   incrementByte() {
     this.Memory[this.MemoryPointer]++;
-    if (this.Memory[this.MemoryPointer] > this.MaxByteHeight)
-      throw new Error(`Byte ${this.MemoryPointer} above max`);
+
+    if (this.Memory[this.MemoryPointer] > this.MaxByteHeight) {
+      this.Memory[this.MemoryPointer] = 0; // Wrap around to 0
+    }
   }
 
   decrementByte() {

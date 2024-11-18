@@ -24,14 +24,15 @@ export const ColorPalettes: Colors = {
     [128, 0, 0], // Red
     [128, 0, 128], // Magenta
     [128, 128, 0], // Yellow
-    [255, 255, 255], // White
+    [128, 128, 128], // White
     // Second Half
-    [128, 128, 128], // Gray
+    [64, 64, 64], // Gray
     [0, 0, 255], // Light Blue
     [0, 255, 0], // Light Green
     [0, 255, 255], // Light Cyan
     [255, 0, 0], // Light Red
     [255, 0, 128], // Light Magenta
     [255, 255, 0], // Light Yellow
+    [255, 255, 255], // Light White
   ],
 };
