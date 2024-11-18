@@ -22,6 +22,10 @@ export const HEADER_INFORMATION: HeaderInformation = [
     W: false,
   },
   {
+    D: true,
+    N: false,
+  },
+  {
     " ": true,
   },
 ];

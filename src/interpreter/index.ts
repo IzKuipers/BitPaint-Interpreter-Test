@@ -17,6 +17,7 @@ export class Interpreter {
   FillBlack = false;
   MaxByteHeight: number = 1;
   InstantMode: boolean = true;
+  DebugMode: boolean = false;
   renderer: Renderer;
   bracketMap: Map<number, number> = new Map();
 
@@ -38,7 +39,7 @@ export class Interpreter {
     if (this.Input.length < 4)
       throw new Error("Insufficient input size for header");
 
-    const headerBytes = this.Input.slice(0, 5);
+    const headerBytes = this.Input.slice(0, HEADER_INFORMATION.length);
     const headerInfoArrayed: any[] = [];
 
     for (let i = 0; i < HEADER_INFORMATION.length; i++) {
@@ -55,6 +56,7 @@ export class Interpreter {
     this.Size = headerInfoArrayed[0];
     this.Depth = headerInfoArrayed[1];
     this.InstantMode = headerInfoArrayed[2];
+    this.DebugMode = headerInfoArrayed[4];
     this.FillBlack = headerInfoArrayed[3];
     this.MaxByteHeight = this.Depth.length - 1;
     this.Instructions = this.Input.replace(headerBytes, "").split("");
@@ -63,7 +65,9 @@ export class Interpreter {
   fillMemory() {
     const dimension = this.Size[0] ** 2;
 
-    this.Memory = new Array<number>(dimension).fill(0);
+    this.Memory = new Array<number>(dimension).fill(
+      this.FillBlack ? 0 : this.MaxByteHeight
+    );
   }
 
   preprocessBrackets() {
@@ -171,7 +175,7 @@ export class Interpreter {
   decrementByte() {
     this.Memory[this.MemoryPointer]--;
     if (this.Memory[this.MemoryPointer] < 0)
-      throw new Error(`Byte ${this.MemoryPointer} below min`);
+      this.Memory[this.MemoryPointer] = this.MaxByteHeight;
   }
 
   async Execute() {
@@ -184,6 +188,11 @@ export class Interpreter {
 
     while (this.InstructionPointer < this.Instructions.length) {
       await this.step();
+
+      if (this.DebugMode) {
+        this.renderer.render();
+        await sleep(10);
+      }
     }
 
     const end = Date.now() - start;

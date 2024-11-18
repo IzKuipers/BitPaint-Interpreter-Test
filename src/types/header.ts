@@ -6,5 +6,6 @@ export type HeaderInformation = [
   Record<string, Color[]>,
   Record<string, boolean>,
   Record<string, boolean>,
+  Record<string, boolean>,
   Record<string, boolean>
 ];
