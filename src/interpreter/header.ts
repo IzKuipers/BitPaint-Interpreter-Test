@@ -18,6 +18,10 @@ export const HEADER_INFORMATION: HeaderInformation = [
     P: false,
   },
   {
+    B: true,
+    W: false,
+  },
+  {
     " ": true,
   },
 ];

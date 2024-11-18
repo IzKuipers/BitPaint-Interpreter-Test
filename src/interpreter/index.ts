@@ -14,6 +14,7 @@ export class Interpreter {
   MemoryPointer = 0;
   Size: Size = [0, 0];
   Depth: Color[] = ColorPalettes.twoColors;
+  FillBlack = false;
   MaxByteHeight: number = 1;
   InstantMode: boolean = true;
   renderer: Renderer;
@@ -35,7 +36,7 @@ export class Interpreter {
     if (this.Input.length < 4)
       throw new Error("Insufficient input size for header");
 
-    const headerBytes = this.Input.slice(0, 4);
+    const headerBytes = this.Input.slice(0, 5);
     const headerInfoArrayed: any[] = [];
 
     for (let i = 0; i < HEADER_INFORMATION.length; i++) {
@@ -52,6 +53,7 @@ export class Interpreter {
     this.Size = headerInfoArrayed[0];
     this.Depth = headerInfoArrayed[1];
     this.InstantMode = headerInfoArrayed[2];
+    this.FillBlack = headerInfoArrayed[3];
     this.MaxByteHeight = this.Depth.length - 1;
     this.Instructions = this.Input.replace(headerBytes, "").split("");
   }
@@ -59,7 +61,9 @@ export class Interpreter {
   fillMemory() {
     const dimension = this.Size[0] ** 2;
 
-    this.Memory = new Array<number>(dimension).fill(0);
+    this.Memory = new Array<number>(dimension).fill(
+      this.FillBlack ? 0 : this.Depth.length - 1
+    );
   }
 
   step() {
