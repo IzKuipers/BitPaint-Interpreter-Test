@@ -1,5 +1,5 @@
-import { HeaderInformation } from "../types/header";
 import { ColorPalettes } from "./color";
+import { HeaderInformation } from "./types";
 
 export const HEADER_INFORMATION: HeaderInformation = [
   {

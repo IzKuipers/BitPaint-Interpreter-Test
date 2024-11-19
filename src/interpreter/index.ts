@@ -1,9 +1,7 @@
-import { Color } from "../types/color";
-import { Size } from "../types/properties";
-import { RendererConstructor } from "../types/renderer";
 import { ColorPalettes } from "./color";
 import { HEADER_INFORMATION } from "./header";
 import { Renderer } from "./renderer";
+import { Color, RendererConstructor, Size } from "./types";
 import { sleep } from "./util";
 
 export class Interpreter {

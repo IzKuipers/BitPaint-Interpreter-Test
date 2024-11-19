@@ -1,4 +1,4 @@
-import { Colors } from "../types/color";
+import { Colors } from "./types";
 
 export const ColorPalettes: Colors = {
   twoColors: [
